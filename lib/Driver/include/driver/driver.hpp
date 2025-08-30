@@ -51,6 +51,20 @@ public:
     write_fixed(values);
   }
 
+  static uint8_t char_to_pattern(char c);
+
+  void showString(const char *str) const;
+
+  void showNumber(int value) const;
+
+  void showNumberDec(int value, uint8_t dotsMask,
+                     bool leadingZeros = false) const;
+
+  void showNumberHex(int value, uint8_t dotsMask = 0,
+                     bool leadingZeros = false) const;
+
+  uint8_t *readBuffer() const;
+
   void clear() const;
 
   void stop() const;
@@ -60,6 +74,10 @@ private:
   void output_digit(uint8_t digit) const;
   void tick() const;
   static bool timer_trampoline(repeating_timer_t *rt);
+  // formatting helpers
+  void formatDecimal(int value, uint8_t out[4], bool leadingZeros) const;
+  void formatHex(int value, uint8_t out[4], bool leadingZeros) const;
+  void applyDots(uint8_t out[4], uint8_t dotsMask) const;
   PinConfig pins_;
   mutable uint8_t patterns_[4] = {0, 0, 0, 0};
   mutable uint8_t current_digit_ = 0;
