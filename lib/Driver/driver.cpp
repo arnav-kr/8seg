@@ -1,14 +1,15 @@
-#include "driver/driver.hpp"
-
+#include "driver.hpp"
+extern "C" {
 #include "hardware/gpio.h"
 #include "hardware/spi.h"
 #include "pico/stdlib.h"
 #include "pico/time.h"
+}
 #include <cstdint>
-#include <cstring>
-#include <pico/types.h>
 
 #define SPI_PORT spi1
+constexpr int DISPLAY_TIMER_INTERVAL_US = -250;
+
 namespace driver {
 DisplayDriver::DisplayDriver(const PinConfig &pins) : pins_(pins) {}
 
@@ -24,8 +25,9 @@ void DisplayDriver::init() const {
   gpio_set_dir(pins_.rclk, GPIO_OUT);
   gpio_put(pins_.rclk, 0);
 
-  // 1000 / 250 = 4
-  add_repeating_timer_us(-250, &DisplayDriver::timer_trampoline, (void *)this,
+  // refresh display at 4ms period (250us per digit)
+  add_repeating_timer_us(DISPLAY_TIMER_INTERVAL_US,
+                         &DisplayDriver::timer_trampoline, (void *)this,
                          &timer_);
 }
 
@@ -49,6 +51,8 @@ void DisplayDriver::clear() const {
 }
 
 void DisplayDriver::output_digit(uint8_t d) const {
+  if (d >= 4)
+    return;
   uint8_t buf[2] = {DigitMasks[d], patterns_[d]};
   gpio_put(pins_.rclk, 0);
   spi_write_blocking(SPI_PORT, buf, 2);
@@ -104,6 +108,11 @@ void DisplayDriver::formatDecimal(int value, uint8_t out[4],
   bool neg = value < 0;
   int64_t v64 = value;
   uint32_t mag = (uint32_t)(neg ? -v64 : v64);
+  if ((!neg && mag > 9999) || (neg && mag > 999)) {
+    for (int i = 0; i < 4; ++i)
+      out[i] = 0x40; // '-'
+    return;
+  }
   for (int i = 0; i < 4; ++i)
     out[i] = 0;
   int pos = 3;
@@ -126,7 +135,7 @@ void DisplayDriver::formatDecimal(int value, uint8_t out[4],
     int first = 0;
     while (first < 4 && out[first] == 0)
       ++first;
-    if (first == 0) { // ----
+    if (first == 0) {
       for (int i = 0; i < 4; ++i)
         out[i] = 0x40;
     } else {
@@ -192,7 +201,6 @@ void DisplayDriver::showNumberHex(int value, uint8_t dotsMask,
   applyDots(out, dotsMask);
   write(out);
 }
-
-uint8_t *DisplayDriver::readBuffer() const { return patterns_; }
+const uint8_t *DisplayDriver::readBuffer() const { return patterns_; }
 
 } // namespace driver

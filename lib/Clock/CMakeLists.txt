@@ -1,0 +1,14 @@
+add_library(clockmod
+  clock.cpp
+)
+target_include_directories(clockmod
+  PUBLIC
+  ${CMAKE_CURRENT_LIST_DIR}/../WiFi/include 
+  ${CMAKE_CURRENT_LIST_DIR}/include
+)
+target_link_libraries(clockmod
+  PUBLIC
+  pico_stdlib
+  hardware_rtc
+  pico_cyw43_arch_lwip_threadsafe_background
+)

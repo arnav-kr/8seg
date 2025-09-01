@@ -19,7 +19,7 @@ set(sdkVersion 2.2.0)
 set(toolchainVersion 14_2_Rel1)
 set(picotoolVersion 2.2.0)
 set(picoVscode ${USERHOME}/.pico-sdk/cmake/pico-vscode.cmake)
-if (EXISTS ${picoVscode})
+if(EXISTS ${picoVscode})
     include(${picoVscode})
 endif()
 # ====================================================================================
@@ -35,33 +35,38 @@ pico_sdk_init()
 
 # Add subdirectories for libraries
 add_subdirectory(lib/Driver)
+add_subdirectory(lib/WiFi)
+add_subdirectory(lib/Clock)
+add_subdirectory(lib/WebServer)
 
 # Add executable. Default name is the project name, version 0.1
 
-add_executable(8seg 8seg.cpp )
+add_executable(8seg 8seg.cpp)
 
 pico_set_program_name(8seg "8seg")
 pico_set_program_version(8seg "0.1")
 
 # Modify the below lines to enable/disable output over UART/USB
 pico_enable_stdio_uart(8seg 0)
-pico_enable_stdio_usb(8seg 0)
+pico_enable_stdio_usb(8seg 1)
 
 # Add the standard library to the build
 target_link_libraries(8seg
-        pico_stdlib)
+    pico_stdlib)
 
 # Add the standard include files to the build
 target_include_directories(8seg PRIVATE
-        ${CMAKE_CURRENT_LIST_DIR}
+    ${CMAKE_CURRENT_LIST_DIR}
 )
 
 # Add any user requested libraries
 # Link our driver library too
-target_link_libraries(8seg 
-        driver
-        
-        )
+target_link_libraries(8seg
+    driver
+    wifi
+    clockmod
+    webserver
+)
 
 pico_add_extra_outputs(8seg)
 

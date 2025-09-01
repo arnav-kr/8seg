@@ -1,9 +1,13 @@
-// Example application using the driver library to cycle hex digits on a 7-seg
-// display.
+#include "clock.hpp"
+#include "driver.hpp"
+#include "wifi.hpp"
+#include <cstdio>
+
+extern "C" {
 #include "pico/stdlib.h"
-#include <driver/driver.hpp>
-#include <pico/time.h>
-#include <stdio.h>
+#include "pico/time.h"
+#include "pico/platform/common.h"
+}
 
 int main() {
   stdio_init_all();
@@ -16,28 +20,31 @@ int main() {
   driver::DisplayDriver display(pins);
   display.init();
 
-  // Show "1234"
-  display.showNumber(1234);
-  sleep_ms(1000);
+  const uint8_t spinner_frames[][4] = {
+      {0x01, 0x02, 0x04, 0x08},
+      {0x02, 0x04, 0x08, 0x01},
+      {0x04, 0x08, 0x01, 0x02},
+      {0x08, 0x01, 0x02, 0x04}};
 
-  // Show negative, overflow, and hex
-  display.showNumber(-42); // shows " -42"
-  sleep_ms(1000);
+  int frame = 0;
+  while (!wifi::connect("Arnav", "ThereIsNoPassword")) {
+    display.write(spinner_frames[frame]);
+    frame = (frame + 1) % 4;
+    sleep_ms(200);
+  }
 
-  display.showNumber(12345); // shows "----" (overflow)
-  sleep_ms(1000);
+  sync_internal_clock_from_ntp();
+  display.write({0x39, 0x5c, 0x54, 0x54}); // Conn
+  sleep_ms(2000);
 
-  display.showNumberHex(0x1AF); // shows " 1AF"
-  sleep_ms(1000);
+  datetime_t now_local;
 
-  // Show number with dots (bit0=units, bit3=thousands)
-  display.showNumberDec(1234, 0b0101); // dots on units and hundreds
-  sleep_ms(1000);
-
-  // Show string (first 4 chars, dot attaches to previous digit)
-  display.showString("Ab.f");
-  sleep_ms(1000);
-
-  // Blank display
-  display.clear();
+  while (true) {
+    if (get_local_datetime(&now_local)) {
+      display.showNumberDec(now_local.hour * 100 + now_local.min, 0b0100);
+      sleep_ms(1000);
+    } else {
+      display.write({0x79, 0x50, 0x50, 0x00}); // Err
+    }
+  }
 }

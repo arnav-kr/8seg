@@ -1,6 +1,8 @@
 #pragma once
-
+extern "C" {
 #include "pico/time.h"
+}
+#include <cassert>
 #include <stddef.h>
 #include <stdint.h>
 
@@ -63,7 +65,7 @@ public:
   void showNumberHex(int value, uint8_t dotsMask = 0,
                      bool leadingZeros = false) const;
 
-  uint8_t *readBuffer() const;
+  const uint8_t *readBuffer() const;
 
   void clear() const;
 
@@ -71,16 +73,25 @@ public:
 
 private:
   void write_fixed(const uint8_t values[]) const;
+
   void output_digit(uint8_t digit) const;
+
   void tick() const;
+
   static bool timer_trampoline(repeating_timer_t *rt);
-  // formatting helpers
+
   void formatDecimal(int value, uint8_t out[4], bool leadingZeros) const;
+
   void formatHex(int value, uint8_t out[4], bool leadingZeros) const;
+
   void applyDots(uint8_t out[4], uint8_t dotsMask) const;
+
   PinConfig pins_;
+
   mutable uint8_t patterns_[4] = {0, 0, 0, 0};
+
   mutable uint8_t current_digit_ = 0;
+
   mutable repeating_timer_t timer_{};
 };
 
