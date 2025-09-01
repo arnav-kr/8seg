@@ -28,7 +28,11 @@ set(PICO_BOARD pico_w CACHE STRING "Board type")
 # Pull in Raspberry Pi Pico SDK (must be before project)
 include(pico_sdk_import.cmake)
 
+
 project(8seg C CXX ASM)
+
+# Add project root as an include directory for config.hpp
+include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
 # Initialise the Raspberry Pi Pico SDK
 pico_sdk_init()
@@ -38,6 +42,7 @@ add_subdirectory(lib/Driver)
 add_subdirectory(lib/WiFi)
 add_subdirectory(lib/Clock)
 add_subdirectory(lib/WebServer)
+add_subdirectory(lib/Fs)
 
 # Add executable. Default name is the project name, version 0.1
 
@@ -66,6 +71,7 @@ target_link_libraries(8seg
     wifi
     clockmod
     webserver
+    fs
 )
 
 pico_add_extra_outputs(8seg)
