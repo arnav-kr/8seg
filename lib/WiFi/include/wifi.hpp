@@ -9,5 +9,6 @@ void init();
 void start_connect(const char *ssid, const char *password);
 bool is_connecting();
 bool is_connected();
+const char* get_ip();
 
 } // namespace wifi
