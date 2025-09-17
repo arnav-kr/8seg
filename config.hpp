@@ -14,4 +14,8 @@ enum Mode {
 };
 
 constexpr Config DEFAULT_CONFIG = {
-    .ssid = "Arnav", .password = "ThereIsNoPassword", .mode = MODE_TIME_HHMM};
+    .ssid = "Arnav",
+    .password = "ThereIsNoPassword",
+    .mode = MODE_COUNTDOWN_DAYS,
+    .deadlines = {1758220200, 1759150600, 0, 0, 0, 0, 0, 0, 0, 0},
+    .deadline_count = 2};

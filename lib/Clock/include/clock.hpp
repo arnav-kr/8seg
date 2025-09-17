@@ -25,6 +25,10 @@ typedef struct NTP_REQUEST_T_ {
 bool sync_internal_clock_from_ntp();
 bool get_local_datetime(datetime_t *dt);
 
+// Utility functions for time conversion
+uint32_t datetime_to_unix(datetime_t dt);
+bool is_leap_year(int year);
+
 // Internal helper functions
 static void ntp_send_request(NTP_REQUEST_T *state);
 static void ntp_recv_callback(void *arg, struct udp_pcb *pcb, struct pbuf *p,

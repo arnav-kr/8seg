@@ -2,6 +2,7 @@
 #include "clock.hpp"
 #include "driver.hpp"
 #include "fs.hpp"
+#include "state_manager.hpp"
 #include "wifi.hpp"
 #include <cstdio>
 
@@ -30,6 +31,9 @@ int main() {
   fs_load_config(cfg);
   wifi::init();
   wifi::start_connect(cfg.ssid, cfg.password);
+
+  state::StateManager state_mgr;
+  state_mgr.setConfig(cfg);
 
   // states
   int spinner_frame = 0;
@@ -79,17 +83,45 @@ int main() {
 
     if (ntp_synced && display_timer.ready()) {
       if (get_local_datetime(&current_time)) {
+        state::DisplayMode disp_mode = state_mgr.getDisplayMode();
         uint8_t base_dots = 0b0100;
         uint8_t wifi_status_dot = 0b0000;
-        if (wifi::is_connected())
+        if (wifi::is_connected()) {
           wifi_status_dot = 0b0001;
-        else
+        } else {
           wifi_status_dot = 0b0000;
+        }
 
         uint8_t final_dots = base_dots | wifi_status_dot;
+        if (disp_mode == state::DISPLAY_TIME) {
 
-        display.showNumberDec(current_time.hour * 100 + current_time.min,
-                              final_dots, true);
+          display.showNumberDec(current_time.hour * 100 + current_time.min,
+                                final_dots, true);
+        } else if (disp_mode == state::DISPLAY_DEADLINE_COUNTDOWN) {
+          uint32_t current_unix = datetime_to_unix(current_time);
+          // Convert local time to UTC for deadline comparison
+          uint32_t current_unix_utc =
+              current_unix -
+              (TIMEZONE_OFFSET_HOURS * 3600 + TIMEZONE_OFFSET_MINUTES * 60);
+          state::DeadlineInfo deadline;
+          if (state_mgr.getNextDeadline(deadline, current_unix_utc)) {
+            // if days, days:hours, else hours:minutes
+            int display_value;
+            uint8_t pattern;
+            if (deadline.days > 0) {
+              display_value = deadline.days * 100 + deadline.hours;
+              pattern = 0b0100 | wifi_status_dot;
+            } else {
+              display_value = deadline.hours * 100 + deadline.minutes;
+              pattern = 0b0010 | wifi_status_dot;
+            }
+            display.showNumberDec(display_value, pattern, true);
+          } else {
+            display.showNumberDec(10000, final_dots);
+          }
+        } else {
+          // meow
+        }
       } else {
         // Err
         display.write({0x79, 0x50, 0x50, 0x00});

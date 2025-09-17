@@ -43,6 +43,7 @@ add_subdirectory(lib/WiFi)
 add_subdirectory(lib/Clock)
 add_subdirectory(lib/Fs)
 add_subdirectory(lib/AsyncTimer)
+add_subdirectory(lib/StateManager)
 
 # Add executable. Default name is the project name, version 0.1
 
@@ -72,6 +73,7 @@ target_link_libraries(8seg
     clockmod
     fs
     asynctimer
+    statemanager
 )
 
 pico_add_extra_outputs(8seg)

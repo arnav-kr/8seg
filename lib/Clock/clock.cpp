@@ -152,3 +152,45 @@ bool get_local_datetime(datetime_t *dt) {
 
   return true;
 }
+
+uint32_t datetime_to_unix(datetime_t dt) {
+  // More accurate conversion accounting for leap years and exact month days
+  int year = dt.year;
+  int month = dt.month;
+  int day = dt.day;
+  int hour = dt.hour;
+  int min = dt.min;
+  int sec = dt.sec;
+
+  // Days in each month (non-leap year)
+  static const int days_in_month[13] = {0,  31, 28, 31, 30, 31, 30,
+                                        31, 31, 30, 31, 30, 31};
+
+  // Calculate total days from 1970-01-01 to the given date
+  uint32_t total_days = 0;
+
+  // Add days for full years
+  for (int y = 1970; y < year; ++y) {
+    total_days += 365 + (is_leap_year(y) ? 1 : 0);
+  }
+
+  // Add days for full months in the current year
+  for (int m = 1; m < month; ++m) {
+    total_days += days_in_month[m];
+    if (m == 2 && is_leap_year(year)) {
+      total_days += 1; // February has 29 days in leap year
+    }
+  }
+
+  // Add days in the current month
+  total_days += day - 1; // -1 because day 1 is 0 days into the month
+
+  // Calculate total seconds
+  uint32_t total_seconds = total_days * 86400 + hour * 3600 + min * 60 + sec;
+
+  return total_seconds;
+}
+
+bool is_leap_year(int year) {
+  return (year % 4 == 0 && year % 100 != 0) || (year % 400 == 0);
+}
