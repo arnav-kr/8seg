@@ -1,5 +1,3 @@
-// Persistent state management using LittleFS for Pico
-
 #include "include/fs.hpp"
 extern "C" {
 #include "hardware/flash.h"

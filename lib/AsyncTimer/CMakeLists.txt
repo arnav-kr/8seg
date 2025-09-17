@@ -1,0 +1,12 @@
+add_library(asynctimer
+  async_timer.cpp
+)
+target_include_directories(asynctimer
+  PUBLIC
+  ${CMAKE_CURRENT_LIST_DIR}/include
+)
+target_link_libraries(asynctimer
+  PUBLIC
+  pico_stdlib
+  pico_time
+)

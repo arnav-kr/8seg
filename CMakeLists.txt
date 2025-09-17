@@ -41,8 +41,8 @@ pico_sdk_init()
 add_subdirectory(lib/Driver)
 add_subdirectory(lib/WiFi)
 add_subdirectory(lib/Clock)
-add_subdirectory(lib/WebServer)
 add_subdirectory(lib/Fs)
+add_subdirectory(lib/AsyncTimer)
 
 # Add executable. Default name is the project name, version 0.1
 
@@ -70,8 +70,8 @@ target_link_libraries(8seg
     driver
     wifi
     clockmod
-    webserver
     fs
+    asynctimer
 )
 
 pico_add_extra_outputs(8seg)

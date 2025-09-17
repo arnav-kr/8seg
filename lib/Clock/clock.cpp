@@ -80,8 +80,7 @@ bool sync_internal_clock_from_ntp() {
     state->request_complete = true;
   }
 
-  absolute_time_t timeout_time =
-      make_timeout_time_ms(NTP_TIMEOUT_MS);
+  absolute_time_t timeout_time = make_timeout_time_ms(NTP_TIMEOUT_MS);
   while (!state->request_complete && !time_reached(timeout_time)) {
     sleep_ms(10);
   }
@@ -112,7 +111,6 @@ static const int days_in_month[] = {0,  31, 28, 31, 30, 31, 30,
 static bool is_leap(int year) {
   return (year % 4 == 0 && year % 100 != 0) || (year % 400 == 0);
 }
-
 
 bool get_local_datetime(datetime_t *dt) {
   if (!rtc_get_datetime(dt)) {

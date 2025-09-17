@@ -3,9 +3,8 @@ extern "C" {
 #include "lwip/ip_addr.h"
 #include "pico/util/datetime.h"
 }
-#include <cassert>
 
-// +5:30
+// +5:30 IST timezone offset
 #define TIMEZONE_OFFSET_HOURS 5
 #define TIMEZONE_OFFSET_MINUTES 30
 
@@ -22,9 +21,13 @@ typedef struct NTP_REQUEST_T_ {
   bool request_complete;
 } NTP_REQUEST_T;
 
-static void ntp_send_request(NTP_REQUEST_T *state);
-static void ntp_recv_callback(const char *response, size_t len);
-static void ntp_dns_found_callback(const char *hostname,
-                                   const ip_addr_t *ipaddr, void *arg);
+// Simple blocking NTP sync API
 bool sync_internal_clock_from_ntp();
 bool get_local_datetime(datetime_t *dt);
+
+// Internal helper functions
+static void ntp_send_request(NTP_REQUEST_T *state);
+static void ntp_recv_callback(void *arg, struct udp_pcb *pcb, struct pbuf *p,
+                              const ip_addr_t *addr, u16_t port);
+static void ntp_dns_found_callback(const char *hostname,
+                                   const ip_addr_t *ipaddr, void *arg);
