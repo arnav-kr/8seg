@@ -1,3 +1,5 @@
+<img src="https://github.com/user-attachments/assets/3af20405-2633-455e-9f07-bd3b32d4bb37" alt="8seg" width="600" align="center"/>
+
 # 8seg: A 7-segment multipurpose display
 
 ## Features
